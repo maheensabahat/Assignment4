@@ -6,7 +6,10 @@ import 'TaskList.dart';
 import 'package:intl/intl.dart';
 
 class create_task extends StatefulWidget {
-  const create_task({Key? key}) : super(key: key);
+  bool canEdit;
+  late Task t;
+
+  create_task({Key? key, required this.canEdit}) : super(key: key);
 
   @override
   _create_taskState createState() => _create_taskState();
@@ -23,35 +26,78 @@ class _create_taskState extends State<create_task> {
   late DateTime datePicked;
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    //Update Task Screen
+    if (widget.canEdit) {
+      name.text = widget.t.name;
+      desc.text = widget.t.desc;
+
+      datePicked = widget.t.date;
+      var formatter = new DateFormat('dd MMM y, EEEE');
+      date.text = formatter.format(widget.t.date);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.black,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            if (widget.canEdit) {
+              Navigator.of(context).pop(widget.t);
+            } else {
+              Navigator.of(context).pop();
+            }
+          },
+        ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           //Header
-          const Padding(
-            padding: EdgeInsets.only(top: 16, left: 24, bottom: 8),
-            child: Text(
-              "New Task",
-              style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 25),
-            ),
+          Padding(
+            padding: const EdgeInsets.only(top: 16, left: 24, bottom: 8),
+            child: !widget.canEdit
+                ? const Text(
+                    "New Task",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 25),
+                  )
+                : const Text(
+                    "Edit Task",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 25),
+                  ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(left: 24, bottom: 36),
-            child: Text(
-              "Add a new task to your task list.",
-              style: TextStyle(
-                  color: Colors.grey,
-                  fontWeight: FontWeight.w300,
-                  fontSize: 15),
-            ),
+
+          Padding(
+            padding: const EdgeInsets.only(left: 24, bottom: 36),
+            child: !widget.canEdit
+                ? const Text(
+                    "Add a new task to your task list.",
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15),
+                  )
+                : const Text(
+                    "Make changes to tasks in you task list.",
+                    style: TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w300,
+                        fontSize: 15),
+                  ),
           ),
 
           //Form
@@ -69,16 +115,23 @@ class _create_taskState extends State<create_task> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    //
-                    const Padding(
-                      padding: EdgeInsets.only(left: 24, bottom: 56),
-                      child: Text(
-                        "Enter the task details.",
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16),
-                      ),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 24, bottom: 56),
+                      child: !widget.canEdit
+                          ? const Text(
+                              "Enter the task details:",
+                              style: TextStyle(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16),
+                            )
+                          : const Text(
+                              "The task details:",
+                              style: TextStyle(
+                                  color: Colors.black54,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 16),
+                            ),
                     ),
 
                     //Name Field
@@ -111,6 +164,7 @@ class _create_taskState extends State<create_task> {
                           filled: true,
                           fillColor: Colors.black12,
                         ),
+                        cursorColor: Colors.black,
                       ),
                     ),
 
@@ -144,6 +198,7 @@ class _create_taskState extends State<create_task> {
                           filled: true,
                           fillColor: Colors.black12,
                         ),
+                        cursorColor: Colors.black,
                       ),
                     ),
 
@@ -187,11 +242,14 @@ class _create_taskState extends State<create_task> {
                             },
                           ),
                         ),
+                        cursorColor: Colors.black,
                       ),
                     ),
 
+                    //Add or Update Button
                     RaisedButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        //to check if fields are filled
                         if (name.text.isEmpty ||
                             desc.text.isEmpty ||
                             date.text.isEmpty) {
@@ -209,17 +267,33 @@ class _create_taskState extends State<create_task> {
                                 : _validateDa = false;
                           });
                         } else {
-                          new_task = Task(name.text, desc.text, datePicked);
-                          Provider.of<taskList>(context, listen: false)
-                              .addTask(new_task);
-                          Navigator.of(context).pop();
+                          //Add or Update Task
+                          if (widget.canEdit) {
+                            Task t = await Provider.of<taskList>(context,
+                                    listen: false)
+                                .updateTask(widget.t, name.text, desc.text,
+                                    datePicked) as Task;
+                            Navigator.of(context).pop(t);
+                          } else {
+                            new_task = Task(name.text, desc.text, datePicked);
+                            Provider.of<taskList>(context, listen: false)
+                                .addTask(new_task);
+                            Navigator.of(context).pop();
+                          }
                         }
                       },
-                      child: const Text(
-                        'Add Task',
-                        style: TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w800),
-                      ),
+                      //Update or Add Text
+                      child: !widget.canEdit
+                          ? const Text(
+                              'Add Task',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w800),
+                            )
+                          : const Text(
+                              'Update',
+                              style: TextStyle(
+                                  fontSize: 13, fontWeight: FontWeight.w800),
+                            ),
                       textColor: Colors.white,
                       color: Colors.black,
                     ),
@@ -250,7 +324,7 @@ class _create_taskState extends State<create_task> {
             textButtonTheme: TextButtonThemeData(
               style: TextButton.styleFrom(
                   primary: Colors.black,
-                  textStyle: TextStyle(
+                  textStyle: const TextStyle(
                       fontWeight: FontWeight.bold) // button text color
                   ),
             ),
@@ -260,7 +334,7 @@ class _create_taskState extends State<create_task> {
       },
     );
     if (picked != null) {
-      var formatter = new DateFormat('dd MMM y, EEEE');
+      var formatter = DateFormat('dd MMM y, EEEE');
       date.text =
           formatter.format(picked.add(const Duration(hours: 23, minutes: 55)));
       datePicked = picked.add(const Duration(hours: 23, minutes: 55));

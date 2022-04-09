@@ -1,17 +1,32 @@
 import 'package:flutter/cupertino.dart';
 
 class Task {
-  String _name;
-  String _desc;
-  DateTime _date;
+  var docId;
+  String name;
+  String desc;
+  DateTime date;
   bool isDone = false;
   DateTime doneDate = DateTime(1, 1, 1950);
 
-  Task(this._name, this._desc, this._date);
+  Task(this.name, this.desc, this.date);
 
-  String get name => _name;
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'desc': desc,
+        'date': date,
+        'isDone': isDone,
+        'doneDate': doneDate
+      };
 
-  String get desc => _desc;
+  Task.fromJson(Map<String, dynamic> json)
+      : name = json['name'],
+        desc = json['desc'],
+        date = json['date'].toDate(),
+        isDone = json['isDone'],
+        doneDate = json['doneDate'].toDate();
 
-  DateTime get date => _date;
+  @override
+  String toString() {
+    return 'Task{name: $name}';
+  }
 }
