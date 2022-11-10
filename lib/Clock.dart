@@ -74,7 +74,7 @@ class _ClockState extends State<Clock> {
                 " $date",
                 style: const TextStyle(
                   fontSize: 15,
-                  fontWeight: FontWeight.w300,
+                  fontWeight: FontWeight.w500,
                   color: Colors.grey,
                 ),
               )

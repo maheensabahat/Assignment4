@@ -88,14 +88,14 @@ class _create_taskState extends State<create_task> {
                     "Add a new task to your task list.",
                     style: TextStyle(
                         color: Colors.grey,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w500,
                         fontSize: 15),
                   )
                 : const Text(
                     "Make changes to tasks in you task list.",
                     style: TextStyle(
                         color: Colors.grey,
-                        fontWeight: FontWeight.w300,
+                        fontWeight: FontWeight.w500,
                         fontSize: 15),
                   ),
           ),
